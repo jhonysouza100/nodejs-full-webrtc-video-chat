@@ -1,4 +1,4 @@
-import app from './app'
+import {server, app} from './app'
 // import { connect } from './connection'
 
 async function main() {
@@ -9,13 +9,11 @@ async function main() {
     // await connect()
   
     // server listening
-    // app.listen(app.get('port'), () => console.log(`Server listen on port: ${app.get('port')}`))
-    app.listen(3000, () => console.log(`Server listen on port: 3000`))
+    server.listen(app.get('port'), () => console.log(`Server listen on port: ${app.get('port')}`))
   
   } catch (error) {
     console.log(error)
   }
 }
-
 
 main()
