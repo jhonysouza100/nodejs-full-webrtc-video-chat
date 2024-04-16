@@ -1,11 +1,20 @@
-import JoinButton from './components/JoinButton';
+import { RoomProvider } from "./context/RoomContext.tsx";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Home } from "./pages/Home.tsx";
+import { Room } from "./pages/Room.tsx";
 
 function App() {
-
   return (
-    <div className='App flex items-center justify-evenly w-screen h-screen'>
-      <JoinButton />
-    </div>
+    <>
+      <BrowserRouter>
+        <RoomProvider>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/room/:id" element={<Room />} />
+          </Routes>
+        </RoomProvider>
+      </BrowserRouter>
+    </>
   );
 }
 
