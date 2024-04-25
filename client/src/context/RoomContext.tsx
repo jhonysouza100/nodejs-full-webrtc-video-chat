@@ -1,7 +1,9 @@
 import Peer from "peerjs";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 import io from 'socket.io-client';
+import { peersReducer } from "./peerReducer";
+import { addPeerAction, removePeerAction } from "./peerActions";
 
 // Conexión al servidor de Socket.io
 const ws = io('/');
@@ -18,6 +20,9 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
   const [me, setMe] = useState<Peer>()
   const [stream, setStream] = useState<MediaStream>()
 
+  // reducers
+  const [peers, dispatch] = useReducer(peersReducer, {})
+
   // functions
   const enterRoom = ({roomId}: { roomId: string}) => {
     
@@ -26,11 +31,9 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     navigate(`/room/${roomId}`)
   }
 
-  const getUsers  = (participants: string) => {
-    
-    console.log(participants)
-    
-  }
+  const getUsers  = (participants: string) => console.log(participants)
+
+  const removePeer = (peerId: string) => dispatch(removePeerAction(peerId))
 
   // effects
   useEffect(() => {
@@ -57,9 +60,37 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
 
     ws.on('get-users', getUsers)
 
+    ws.on('user-user-disconected' , removePeer)
+
   }, [])
 
-  const data = { ws, me };
+  useEffect(() => {
+
+    if(!me) return
+    if(!stream) return
+
+    ws.on('user-joined', (peerId) => {
+      const call = me.call(peerId, stream)
+
+      call.on('stream', (peerStream) => {
+        dispatch(addPeerAction(peerId, peerStream))
+      })
+    })
+    
+    me.on('call', (call) => { 
+      call.answer(stream)
+      
+      call.on('stream', (peerStream) => {
+        dispatch(addPeerAction(call.peer, peerStream))
+      })
+    })
+
+
+  }, [me, stream])
+
+  console.log({peers})
+
+  const data = { ws, me, stream, peers };
 
   return <RoomContext.Provider value={data}>{children}</RoomContext.Provider>;
 };
