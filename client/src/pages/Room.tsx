@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom"
 import { RoomContext } from "../context/RoomContext"
 import { VideoPlayer } from "../components/VideoPlayer"
 import { PeerState } from "../context/peerReducer"
+import { ShareScreenButton } from "../components/ShareScreenButton"
 
 export const Room = () => {
 
   const {id} = useParams()
-  const {ws, me, stream, peers} = useContext(RoomContext)
+  const {ws, me, stream, peers, shareScreen} = useContext(RoomContext)
 
   useEffect(() => {
 
@@ -25,6 +26,10 @@ export const Room = () => {
             <VideoPlayer stream={peer.stream} />
           ))
         }
+      </div>
+
+      <div className="fixed bottom-0 p-6 w-full flex justify-center border-t-2">
+        <ShareScreenButton onClick={shareScreen} />
       </div>
 
     </>
